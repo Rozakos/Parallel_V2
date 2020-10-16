@@ -14,9 +14,6 @@ int LED5 = 5;
 
 
 
-
-
-
 #define DEBUG
 #ifdef DEBUG
  #define DEBUG_PRINTLN(x)  Serial << (x) << EndLiine;
@@ -33,10 +30,10 @@ int LED5 = 5;
 //*********************************************************************************
 char c;
 byte index = 0;
-String masege[10]={};
+String message[10]={};
 boolean reading = false; //Char Read
 boolean getInputComplete = false;
-boolean getComand = false;
+boolean getCommand = false;
 #define SerialBoud 115200 // Tsxita Seriaki
 #define Delimiter '&' // Diaxoristis gia endoles {38}
 #define SubDelimiter '#' // Diaxoristis gia endoles {35}
@@ -95,9 +92,9 @@ void getInput()
 		case Delimiter:
 			
 			//Serial << F("Got Mesage : ") << index << EndLiine;
-			DEBUG_PRINT("Got Mesage : ");
+			DEBUG_PRINT("Got Message : ");
 			DEBUG_PRINTLN(index);
-			DEBUG_PRINTLN(masege[index]);
+			DEBUG_PRINTLN(message[index]);
 			index++;
 		break;
 		case EndInput :
@@ -114,7 +111,7 @@ void getInput()
 		break;
 		default:
 			
-			masege[index] += c;
+			message[index] += c;
 			
 	}
 }
@@ -157,14 +154,16 @@ void eraseInput()
 {
 	for (int i = 0; i <= index; i++)
 	{
-		masege[i]=""; 
+		message[i]=""; 
 	}
 	Serial.flush();
 	
 	index = 0;
 	getInputComplete = false;
-	getComand = false;
+	getCommand = false;
 }
+
+
 
 void softReset() 
 {
@@ -184,6 +183,7 @@ void printID()
 		client.print("<br>");
 	#endif
 }
+
 
 
 void setDO(int pin ,int State )
@@ -214,22 +214,23 @@ void ReadDO(int pin)
 }
 
 
+
 void prosesInput()
 {
-	if (masege[0] == ID)
+	if (message[0] == ID)
 	{
 		//Serial << F("Got ID") << EndLiine ;
 		DEBUG_PRINTLN("Got ID");
-		getComand = true; 
+		getCommand = true; 
 	}
-	else if (masege[0] == "731215")  //Codiko
+	else if (message[0] == "731215")  //Codiko
 	{
 		printID();
 		eraseInput();
 	}
 	else 
 	{
-		getComand = false;
+		getCommand = false;
 		Serial << F("???") << EndLiine ;
 		eraseInput();  //???
 	}
@@ -241,49 +242,49 @@ void prosesInput()
 
 void prosesComand()
 {
-	 if (masege[1] == "eho")
+	 if (message[1] == "eho")
 	{
 		printID() ;
 	}
-	 if (masege[1] == "t1")
+	 if (message[1] == "t1")
 	{
 		Serial << F("25") << EndLiine ;
 	}
-	else if (masege[1] == "d")
+	else if (message[1] == "d")
 	{
 		 for (int i = 2; i <= index; i++)
 		{
-			if (masege[i].startsWith("s"))
+			if (message[i].startsWith("s"))
 			{
-				int pindo = masege[i].substring(1).toInt() ;
+				int pindo = message[i].substring(1).toInt() ;
 				
 				
 				setDO (pindo , HIGH);
 				
 				
 			}
-			if (masege[i].startsWith("c"))
+			if (message[i].startsWith("c"))
 			{
-				int pindo = masege[i].substring(1).toInt() ;
+				int pindo = message[i].substring(1).toInt() ;
 				
 				setDO (pindo , LOW);
 			}
-			if (masege[i].startsWith("i"))
+			if (message[i].startsWith("i"))
 			{
-				int pindo = masege[i].substring(1).toInt() ;
+				int pindo = message[i].substring(1).toInt() ;
 				
 				invertDO (pindo );
 			}
-			if (masege[i].startsWith("r"))
+			if (message[i].startsWith("r"))
 			{
-				int pindo = masege[i].substring(1).toInt() ;
+				int pindo = message[i].substring(1).toInt() ;
 				
 				ReadDO (pindo );
 			}
 		}
 		//refreshDO();		
 	}
-	else if (masege[1] == "reboot")
+	else if (message[1] == "reboot")
 	{
 		//Serial << F("end") << EndLiine ;
 		DEBUG_PRINTLN("end ...");
@@ -300,7 +301,7 @@ void loop()
 //***************************  Comunication Loop  *********************************
 //*********************************************************************************
 	communicationEvent() ;
-	if(getInputComplete) {prosesInput();if(getComand){prosesComand();}eraseInput();Serial << F("q") << EndLiine;}
+	if(getInputComplete) {prosesInput();if(getCommand){prosesComand();}eraseInput();Serial << F("q") << EndLiine;}
 //*********************************************************************************
 //***************************  Comunication Loop  *********************************
 //*********************************************************************************
