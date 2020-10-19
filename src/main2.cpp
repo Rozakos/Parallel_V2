@@ -19,12 +19,13 @@ int LED5 = 5;
 
 int timer = 1000;
 
-
+char incomingByte;
 byte index = 0;
-char bit_8_array[8] = {3};
+char bit_8_array[8] = {3, 3, 3, 3, 3, 3, 3, 3};
 String message[30] = "";
 boolean startRead = false;
 boolean getInputComplete = false;
+boolean reading_serial = false;
 
 
 void setup() {
@@ -41,29 +42,17 @@ void setup() {
   
 }
 
-// !1
+
 
 void getInput(){
 
-  char received = Serial.read();
-  Serial.print("Message Received: ");
-  Serial.println(received);
-
-  if (received == StartMessage)
-  {
-
-    startRead = true;
-    received = ' ';
-    Serial.println("OK");
-    
-  }
   if (startRead == true)
   {
-    if (received == (char) "1")
+    if (incomingByte ==  49)
     {
-       Serial.println("OK2");
+      Serial.println("OK2");
       for (int index = 0; index < 8; index++);{
-        if (bit_8_array[index] != 3)
+        if (bit_8_array[index] == 3)
         {
           bit_8_array[index] = 1;
                
@@ -74,6 +63,7 @@ void getInput(){
 }
 
 
+// !49
 
 
 
@@ -85,6 +75,28 @@ void serial_event()
   }
 }
 
-void loop() {
-  serial_event();
+
+
+void communication_event()
+{
+  if(Serial.available() > 0)
+  {
+    incomingByte = Serial.read();
+    Serial.print("Message received: ");
+    Serial.println(incomingByte, DEC);
+    }
+    if (incomingByte == 63)
+    {
+      Serial.println("? received");
+      reading_serial = true;
+      incomingByte = ' ';
+    }
+    if(reading_serial == true)
+    {
+      getInput();
+    }
+  }
+
+  void loop() {
+  communication_event();
 }
