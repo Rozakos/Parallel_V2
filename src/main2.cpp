@@ -2,11 +2,7 @@
 
 //?a1&d&s1&c2&s3&c4&s5&c6&s7&c8!
 
-#define Delimiter ':' // How we separate the command
-#define EndInput '\r' // How the input ends
-#define StartMessage '!' // How the message starts
-#define EndMessage '$' // How the message ends
-#define EndLine "\n\r"//"\n\r" // 
+
 
 int LED12 = 12;
 int LED11 = 11;
@@ -21,11 +17,21 @@ int timer = 1000;
 
 char incomingByte;
 byte index = 0;
-char bit_8_array[8] = {3, 3, 3, 3, 3, 3, 3, 3};
 String message[30] = "";
-boolean startRead = false;
-boolean getInputComplete = false;
+boolean start_read = false;
+boolean get_input_complete = false;
 boolean reading_serial = false;
+boolean get_command = false;
+#define Baudrate 115200
+#define SubDelimeter '#'
+#define StartInput '?'
+#define ID "a1"
+#define Delimiter ':' // How we separate the command
+#define EndInput '\r' // How the input ends
+#define StartMessage '!' // How the message starts
+#define EndMessage '$' // How the message ends
+#define EndLine "\n\r"//"\n\r" // 
+
 
 
 void setup() {
@@ -38,28 +44,41 @@ void setup() {
   pinMode(LED7, OUTPUT);
   pinMode(LED6, OUTPUT);
   pinMode(LED5, OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(Baudrate);
   
 }
 
 
 
-void getInput(){
-
-  if (startRead == true)
+void getInput()
+{
+  switch (incomingByte)
   {
-    if (incomingByte ==  49)
-    {
-      Serial.println("OK2");
-      for (int index = 0; index < 8; index++);{
-        if (bit_8_array[index] == 3)
-        {
-          bit_8_array[index] = 1;
-               
-        }         
-      }
-    }
+    case 32 : 
+
+    break;
+
+    case 8 :
+    
+    break;
+
+    case 127:
+
+    break;
+
+    case Delimiter:
+      DEBUG_PRINT("Got Message :");
+      DEBUG_PRINTLN("Got Message : ");
+      DEBUG_PRINTLN(message[index]);
+      index++;
+    break;
+    case EndInput :
+      reading_serial = false;
+
+
+
   }
+
 }
 
  
@@ -74,6 +93,23 @@ void serial_event()
     getInput();
   }
 }
+
+
+
+void proccess_input()
+{
+  if (message[0] == "D")
+    for (int i = 1; i <=index; i++)
+    {
+      if (message[i].startsWith("S"))
+      {}
+    }
+  {
+
+
+  } 
+}
+
 
 
 
@@ -99,4 +135,5 @@ void communication_event()
 
   void loop() {
   communication_event();
+
 }
